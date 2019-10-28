@@ -2,15 +2,22 @@
 #include <FS.h>
 #include <StreamUtils.h>
 StaticJsonDocument<4000> doc;
+
+
 char json[] = "{\"usuarios\":{\"00000001\":{\"nome\":\"rodrigo\",\"email\":\"rodrigo@codebit.com.br\",\"senha\":\"1234\"},\"00000002\":{\"nome\":\"teste\",\"email\":\"teste@codebit.com.br\",\"senha\":\"4321\"}},\"configuracao\":{\"apiUrl\":\"nerdcompannyapps.com/api/ponto/marcar-ponto\",\"bloquearPonto\":true}}";
+char jsonBase[] = "{\"usuarios\":{\"00000000\":{\"nome\":\"nome teste\",\"email\":\"teste@teste.com.br\",\"senha\":\"senhateste\"}},\"configuracao\":{\"apiUrl\":\"api.com\endpoint\",\"bloquearPonto\":true}}";
+
 const char* filename = "/db.json";
 String url;
 int bloquearPonto;
 
 
+
+
 void setup() {
     Serial.begin(9600);
     SPIFFS.begin();
+    Serial.println();
     Serial.println("inicializando SPIFFS ...");
     if (!SPIFFS.begin()) {
       Serial.println("Error SPIFFS!");
@@ -18,14 +25,25 @@ void setup() {
     }
     while (!Serial) continue;
 
-   if(carregarArquivo()){
+   if(carregarArquivo(filename)){
     if(!loadData()){
       Serial.println("Dados invalidos!!");
     }else{
       loadListaUsuarios();
       
-      findUser("00000002");
+      //findUser("00000002");
+
+     
+
       
+      Serial.println();
+     
+      Serial.println(obterJsonCompleto());
+
+      
+      removeUsuario("teste@codebit.com.br");
+
+       Serial.println(obterJsonCompleto());
     }
    }else{
       Serial.println("Erro db não existe!!");
@@ -54,35 +72,25 @@ void loop() {
 }
 
 
-bool criaArquivo(String json){
-    File file = SPIFFS.open(filename, "w");
-    if(file){
-      file.print(json);
-      file.close();
-      Serial.println("Arquivo gravado");
-      return true;
-    }else{
-      Serial.println("Error ao criar arquivo");
-      return false;
-    }
-  }
 
-bool carregarArquivo(){
-  bool statusFile = true;
-  File file = SPIFFS.open(filename, "r");
-  if(file){
-      ReadBufferingStream bufferedFile{file, 102};
-      DeserializationError error = deserializeJson(doc, bufferedFile);
-      if (error) {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.c_str());
-        statusFile = false;
+String obterJsonCompleto(){
+  String js;
+  serializeJson(doc, js);
+  return js;
+}
+
+
+bool removeUsuario(String email){
+  bool removido = false;
+  JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
+  for (JsonPair kv : listaUsuarios) {
+      JsonObject objUsuario = kv.value().as<JsonObject>();
+      if(email == objUsuario["email"]){
+        listaUsuarios.remove(kv.key().c_str());
+        removido = true;
       }
-      file.close();
-  }else{
-    statusFile = false;
   }
-  return statusFile;
+  return removido;
 }
 
 bool loadData(){
@@ -132,12 +140,34 @@ void loadListaUsuarios(){
   Serial.println(bloquearPonto);
 }
 
-void findUser(String UID){
+JsonObject findUserUid(String UID){
   JsonObject Usuario = doc["usuarios"][UID].as<JsonObject>();
-  if(!Usuario.isNull()){
-    String nome = Usuario["nome"];
-    Serial.println(nome);
+  return Usuario;
+}
+
+bool carregarArquivo(String arquivo){
+  bool statusFile = true;
+  File file = SPIFFS.open(arquivo, "r");
+  if(file){
+      ReadBufferingStream bufferedFile{file, 102};
+      DeserializationError error = deserializeJson(doc, bufferedFile);
+      if (error) {
+        statusFile = false;
+      }
+      file.close();
   }else{
-    Serial.println("não localizado");
+    statusFile = false;
   }
+  return statusFile;
+}
+
+bool criaArquivo(String arquivo,String json){
+    File file = SPIFFS.open(arquivo, "w");
+    if(file){
+      file.print(json);
+      file.close();
+      return true;
+    }else{
+      return false;
+    }
 }
