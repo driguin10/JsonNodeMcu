@@ -41,8 +41,18 @@ void setup() {
       Serial.println(obterJsonCompleto());
 
       
-      removeUsuario("teste@codebit.com.br");
+      removerUsuario("teste@codebit.com.br");
 
+       Serial.println(obterJsonCompleto());
+
+
+       novoUsuario("123","rod","rod@teste","222");
+
+       Serial.println(obterJsonCompleto());
+
+
+       UpdateUsuarioEmail("rod@teste","xxx","rodrigooo","rod@teste","12345");
+       Serial.println();
        Serial.println(obterJsonCompleto());
     }
    }else{
@@ -73,14 +83,74 @@ void loop() {
 
 
 
+
+
+//-----------criar---------------------------
+
+//criar novo usuario
+void novoUsuario(String uid, String nome, String email, String senha){
+    JsonObject user = doc["usuarios"].createNestedObject(uid);
+    user["nome"] = nome;
+    user["email"] = email;
+    user["senha"] = senha;
+}
+
+//-----------------------------------------
+
+
+
+//-----------Buscas--------------------------
+
+//busca usuario por uid
+JsonObject buscaUsuarioUid(String uid){
+  JsonObject usuario = doc["usuarios"][uid].as<JsonObject>();
+  return usuario;
+}
+
+//busca usuario por email
+JsonObject buscaUsuarioEmail(String email){
+  JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
+  for (JsonPair kv : listaUsuarios) {
+      JsonObject usuario = kv.value().as<JsonObject>();
+      if(email == usuario["email"]){
+       return usuario;
+      }
+  }
+}
+
+//retorna todos os usuarios
+JsonObject listarUsuarios(){
+  JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
+  return listaUsuarios;
+}
+
+//retorna json inteiro
 String obterJsonCompleto(){
   String js;
   serializeJson(doc, js);
   return js;
 }
 
+//-------------------------------------------
 
-bool removeUsuario(String email){
+
+//-----------Update--------------------------
+JsonObject UpdateUsuarioEmail(String emailBusca, String uid, String nome, String email, String senha ){
+  JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
+  for (JsonPair kv : listaUsuarios) {
+      JsonObject usuario = kv.value().as<JsonObject>();
+      if(emailBusca == usuario["email"]){
+          removerUsuario(emailBusca);
+          novoUsuario(uid,nome,email,senha);
+      }
+  }
+}
+
+//-------------------------------------------
+
+
+//remove usuario por email
+bool removerUsuario(String email){
   bool removido = false;
   JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
   for (JsonPair kv : listaUsuarios) {
@@ -92,6 +162,9 @@ bool removeUsuario(String email){
   }
   return removido;
 }
+
+//-------------------------------------------
+
 
 bool loadData(){
   JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
@@ -140,10 +213,6 @@ void loadListaUsuarios(){
   Serial.println(bloquearPonto);
 }
 
-JsonObject findUserUid(String UID){
-  JsonObject Usuario = doc["usuarios"][UID].as<JsonObject>();
-  return Usuario;
-}
 
 bool carregarArquivo(String arquivo){
   bool statusFile = true;
