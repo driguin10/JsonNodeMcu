@@ -1,6 +1,16 @@
 #include <ArduinoJson.h>
 #include <FS.h>
 #include <StreamUtils.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+#define APSSID "SmartPontoDoor"
+#define APPSK  "codehell666"
+const char *ssid = APSSID;
+const char *password = APPSK;
+ESP8266WebServer server(80);
+
+
 StaticJsonDocument<4000> doc;
 
 
@@ -12,7 +22,53 @@ String url;
 int bloquearPonto;
 
 
+void handleRoot() {                          // When URI / is requested, send a web page with a button to toggle the LED
+  server.send(200, "text/html", "<form action=\"/login\" method=\"POST\"><input type=\"text\" name=\"username\" placeholder=\"Username\"></br><input type=\"password\" name=\"password\" placeholder=\"Password\"></br><input type=\"submit\" value=\"Login\"></form><p>Try 'John Doe' and 'password123' ...</p>");
+}
 
+void handleLogin() {                         // If a POST request is made to URI /login
+  if( ! server.hasArg("username") || ! server.hasArg("password") 
+      || server.arg("username") == NULL || server.arg("password") == NULL) { // If the POST request doesn't have username and password data
+    server.send(400, "text/plain", "400: Invalid Request");         // The request is invalid, so send HTTP status 400
+    return;
+  }
+  if(server.arg("username") == "rodrigo" && server.arg("password") == "123") { // If both the username and the password are correct
+
+
+JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
+
+  String x = server.arg("username") +"<br> <ul>";
+  
+  for (JsonPair kv : listaUsuarios) {
+      String uid = kv.key().c_str();
+      JsonObject objUsuario = kv.value().as<JsonObject>();
+      String nome = objUsuario["nome"];
+      String email = objUsuario["email"];
+      String senha = objUsuario["senha"];
+
+      x+="<li> uid: " + uid + " - nome: " + nome + " - email: " + email + " - senha: " + senha+"</li>";
+      
+  }
+  x+="</ul>";
+    
+    server.send(200, "text/html", x);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  } else {                                                                              // Username and password don't match
+    server.send(401, "text/plain", "401: Unauthorized");
+  }
+}
+
+void handleNotFound(){
+  server.send(404, "text/plain", "404: Not found"); // Send HTTP status 404 (Not Found) when there's no handler for the URI in the request
+}
 
 void setup() {
     Serial.begin(9600);
@@ -25,64 +81,72 @@ void setup() {
     }
     while (!Serial) continue;
 
+  //gerarWifi();
+  conectarWifi();
+    
+  server.on("/", HTTP_GET, handleRoot);        // Call the 'handleRoot' function when a client requests URI "/"
+  server.on("/login", HTTP_POST, handleLogin); // Call the 'handleLogin' function when a POST request is made to URI "/login"
+  server.onNotFound(handleNotFound);    
+  server.begin();
+  Serial.println("HTTP server started");
+  
    if(carregarArquivo(filename)){
     if(!loadData()){
       Serial.println("Dados invalidos!!");
     }else{
-      loadListaUsuarios();
-      
+      /*loadListaUsuarios();
       //findUser("00000002");
-
-     
-
-      
       Serial.println();
-     
       Serial.println(obterJsonCompleto());
-
-      
       removerUsuario("teste@codebit.com.br");
-
-       Serial.println(obterJsonCompleto());
-
-
-       novoUsuario("123","rod","rod@teste","222");
-
-       Serial.println(obterJsonCompleto());
-
-
-       UpdateUsuarioEmail("rod@teste","xxx","rodrigooo","rod@teste","12345");
-       Serial.println();
-       Serial.println(obterJsonCompleto());
+      Serial.println(obterJsonCompleto());
+      novoUsuario("123","rod","rod@teste","222");
+      Serial.println(obterJsonCompleto());
+      UpdateUsuarioEmail("rod@teste","xxx","rodrigooo","rod@teste","12345");
+      Serial.println();
+      Serial.println(obterJsonCompleto());*/
     }
    }else{
       Serial.println("Erro db não existe!!");
    }
-
-
- 
-
-    
-
- 
-
- /*
-Serial.print("teste: ");
-doc["usuarios"]["00000001"]["nome"] = "rods";
-
-String n = doc["usuarios"]["00000001"]["nome"];
- Serial.println(n);
-
-  String output;
-  serializeJson(doc, output);
-  criaArquivo(output);*/
+   /*
+  Serial.print("teste: ");
+  doc["usuarios"]["00000001"]["nome"] = "rods";
+  
+  String n = doc["usuarios"]["00000001"]["nome"];
+   Serial.println(n);
+  
+    String output;
+    serializeJson(doc, output);
+    criaArquivo(output);*/
 }
 
 void loop() {
+  server.handleClient();
 }
 
+void gerarWifi(){
+  Serial.print("Configuring access point...");
+  WiFi.softAP(ssid, password);
+  IPAddress myIP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(myIP);
+}
 
+void conectarWifi(){
+  WiFi.mode(WIFI_STA);
+  WiFi.begin("codebit", "roikROIKroik");
 
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
 
 
 //-----------criar---------------------------
