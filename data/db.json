@@ -1,0 +1,13 @@
+{
+  "usuarios":{
+    "00000000": {
+      "nome":"nome teste",
+      "email":"teste@teste.com.br",
+      "senha":"senhateste"
+    }
+  },
+  "configuracao":{
+  "apiUrl":"api.comendpoint",
+  "bloquearPonto":true
+  }
+}

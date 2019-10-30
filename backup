@@ -11,6 +11,7 @@
 #define APPSK  "codehell666"
 const char *ssid = APSSID;
 const char *password = APPSK;
+//ESP8266WebServer server(80);
 AsyncWebServer server(80);
 
 StaticJsonDocument<4000> doc;
@@ -28,7 +29,6 @@ String processor(const String& var){
 }
 
 String processorHome(const String& var){
-  Serial.println(var);
   return "Bem vindo rodrigo";
 }
 /*
@@ -137,8 +137,8 @@ void setup() {
   if(request->hasParam("token")){
     AsyncWebParameter* token = request->getParam("token");
     Serial.println(token->value().c_str());
-    //request->send(200, "text/plain", "token ok");
-    request->send(SPIFFS, "/principal.html", String(), false, processorHome);
+    request->send(200, "text/plain", "token ok");
+    //request->send(SPIFFS, "/principal.html", String(), false, processorHome);
   }else{
     request->send(200, "text/plain", "token não existente");
   }
