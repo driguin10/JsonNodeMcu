@@ -7,14 +7,16 @@
 #include <WiFiClient.h>
 
 
-#define APSSID "SmartPontoDoor"
-#define APPSK  "codehell666"
+#define APSSID "codebitt"
+#define APPSK  "roikROIKroik"
 const char *ssid = APSSID;
 const char *password = APPSK;
 AsyncWebServer server(80);
 
 StaticJsonDocument<4000> doc;
 
+long uidUsuario = -1;
+int tempoExpiracao = 60000; //600000
 
 char json[] = "{\"usuarios\":{\"00000001\":{\"nome\":\"rodrigo\",\"email\":\"rodrigo@codebit.com.br\",\"senha\":\"1234\"},\"00000002\":{\"nome\":\"teste\",\"email\":\"teste@codebit.com.br\",\"senha\":\"4321\"}},\"configuracao\":{\"apiUrl\":\"nerdcompannyapps.com/api/ponto/marcar-ponto\",\"bloquearPonto\":true}}";
 char jsonBase[] = "{\"usuarios\":{\"00000000\":{\"nome\":\"nome teste\",\"email\":\"teste@teste.com.br\",\"senha\":\"senhateste\"}},\"configuracao\":{\"apiUrl\":\"api.com\endpoint\",\"bloquearPonto\":true}}";
@@ -31,54 +33,18 @@ String processorHome(const String& var){
   Serial.println(var);
   return "Bem vindo rodrigo";
 }
-/*
-void handleRoot() {                          // When URI / is requested, send a web page with a button to toggle the LED
-  server.send(200, "text/html", "<form action=\"/login\" method=\"POST\"><input type=\"text\" name=\"username\" placeholder=\"Username\"></br><input type=\"password\" name=\"password\" placeholder=\"Password\"></br><input type=\"submit\" value=\"Login\"></form><p>Try 'John Doe' and 'password123' ...</p>");
+
+
+
+bool verificaToken(){
+  bool statusToken = false;
+   if(uidUsuario!= -1){
+    if(millis() <= uidUsuario + tempoExpiracao){
+      statusToken = true;
+    }
+   }
+ return statusToken;
 }
-
-void handleLogin() {                         // If a POST request is made to URI /login
-  if( ! server.hasArg("username") || ! server.hasArg("password") 
-      || server.arg("username") == NULL || server.arg("password") == NULL) { // If the POST request doesn't have username and password data
-    server.send(400, "text/plain", "400: Invalid Request");         // The request is invalid, so send HTTP status 400
-    return;
-  }
-  if(server.arg("username") == "rodrigo" && server.arg("password") == "123") { // If both the username and the password are correct
-
-
-JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
-
-  String x = server.arg("username") +"<br> <ul>";
-  
-  for (JsonPair kv : listaUsuarios) {
-      String uid = kv.key().c_str();
-      JsonObject objUsuario = kv.value().as<JsonObject>();
-      String nome = objUsuario["nome"];
-      String email = objUsuario["email"];
-      String senha = objUsuario["senha"];
-
-      x+="<li> uid: " + uid + " - nome: " + nome + " - email: " + email + " - senha: " + senha+"</li>";
-      
-  }
-  x+="</ul>";
-    
-    server.send(200, "text/html", x);
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  } else {                                                                              // Username and password don't match
-    server.send(401, "text/plain", "401: Unauthorized");
-  }
-}
-
-void handleNotFound(){
-  server.send(404, "text/plain", "404: Not found"); // Send HTTP status 404 (Not Found) when there's no handler for the URI in the request
-}*/
 
 void setup() {
     Serial.begin(9600);
@@ -91,64 +57,48 @@ void setup() {
     }
     while (!Serial) continue;
 
-  //gerarWifi();
-  conectarWifi();
-    
-  /*server.on("/", HTTP_GET, handleRoot);        // Call the 'handleRoot' function when a client requests URI "/"
-  server.on("/login", HTTP_POST, handleLogin); // Call the 'handleLogin' function when a POST request is made to URI "/login"
-  server.onNotFound(handleNotFound);   */
-
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/login.html", String(), false, processor);
-  });
   
-  // Route to load style.css file
-  server.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/styles.css", "text/css");
-  });
-
-
-  server.on("/login", HTTP_POST, [](AsyncWebServerRequest *request){
-
     
-    
+
+server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+   request->send(SPIFFS, "/login.html", String(), false, processor);
+});
+  
+server.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request){
+   request->send(SPIFFS, "/styles.css", "text/css");
+});
+
+server.on("/login", HTTP_POST, [](AsyncWebServerRequest *request){
     if(request->hasParam("email",true) && request->hasParam("senha",true)){
-      AsyncWebParameter* email = request->getParam("email",true);
-      AsyncWebParameter* senha = request->getParam("senha",true);
+       String emailU = request->getParam("email",true)->value().c_str();
+       String senhaU = request->getParam("senha",true)->value().c_str();
 
-       Serial.print(email->value().c_str());
-        Serial.print(senha->value().c_str());
-
-      if(email->value().c_str()=="a@a" && senha->value().c_str()=="123"){
-        request->send(SPIFFS, "/principal.html", String(), false, processorHome);
+      if(emailU == "a@a" && senhaU == "123"){
+        uidUsuario = millis();
+        request->redirect("/home?uid=" + String(millis()));
       }else{
         Serial.print("usuario Não autorizado");
       }
-      
-      
     }else{
       Serial.print("Não Permitido");
     }
-   // request->send(SPIFFS, "/principal.html", String(), false, processorPri);
-  });
+});
 
-
- server.on("/home", HTTP_GET, [](AsyncWebServerRequest *request){
-  if(request->hasParam("token")){
-    AsyncWebParameter* token = request->getParam("token");
-    Serial.println(token->value().c_str());
-    //request->send(200, "text/plain", "token ok");
-    request->send(SPIFFS, "/principal.html", String(), false, processorHome);
+server.on("/home", HTTP_GET, [](AsyncWebServerRequest *request){
+  if(request->hasParam("uid")){
+    String uidU = request->getParam("uid")->value().c_str();
+    if(uidU == String(uidUsuario)){
+       request->send(SPIFFS, "/principal.html", String(), false, processorHome);
+    }else{
+       request->send(200, "text/plain", "Token negado");
+    }
   }else{
     request->send(200, "text/plain", "token não existente");
   }
-  });
+});
 
-
-
-   
-  server.begin();
-  Serial.println("HTTP server started");
+server.begin();
+Serial.println("HTTP server started");
   
    if(carregarArquivo(filename)){
     if(!loadData()){
@@ -179,33 +129,57 @@ void setup() {
     String output;
     serializeJson(doc, output);
     criaArquivo(output);*/
+    if(!conectarWifi()){
+      gerarWifi();
+    }else{
+     
+    }
 }
 
 void loop() {
  // server.handleClient();
+ if(uidUsuario > 0){
+  if(!verificaToken()){
+    uidUsuario = -1;
+  }
+ }
 }
 
+
 void gerarWifi(){
-  Serial.print("Configuring access point...");
-  WiFi.softAP(ssid, password);
+  Serial.print("Configurando access point...");
+  WiFi.softAP("SmartPonto", "12345678");
   IPAddress myIP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
+  Serial.print("AP criado, IP address: ");
   Serial.println(myIP);
 }
 
-void conectarWifi(){
-  WiFi.mode(WIFI_STA);
-  WiFi.begin("codebit", "roikROIKroik");
+  
+  
 
-  while (WiFi.status() != WL_CONNECTED) {
+
+bool conectarWifi(){
+  Serial.println(ssid);
+  Serial.println(password);
+  
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  
+  long tempo = millis()+ 30000;
+  while (WiFi.status() != WL_CONNECTED && millis() <= tempo) {
     delay(500);
     Serial.print(".");
   }
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  if(WiFi.status() != WL_CONNECTED){
+    return false;
+  }else{
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+    return true;
+  }
 }
 
 
@@ -272,7 +246,6 @@ JsonObject UpdateUsuarioEmail(String emailBusca, String uid, String nome, String
 
 //-------------------------------------------
 
-
 //remove usuario por email
 bool removerUsuario(String email){
   bool removido = false;
@@ -288,7 +261,6 @@ bool removerUsuario(String email){
 }
 
 //-------------------------------------------
-
 
 bool loadData(){
   JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
@@ -336,7 +308,6 @@ void loadListaUsuarios(){
   Serial.print("Bloquear:");
   Serial.println(bloquearPonto);
 }
-
 
 bool carregarArquivo(String arquivo){
   bool statusFile = true;
