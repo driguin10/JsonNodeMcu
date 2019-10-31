@@ -7,7 +7,7 @@
 #include <WiFiClient.h>
 
 
-#define APSSID "codebitt"
+#define APSSID "codebit"
 #define APPSK  "roikROIKroik"
 const char *ssid = APSSID;
 const char *password = APPSK;
@@ -30,11 +30,26 @@ String processor(const String& var){
 }
 
 String processorHome(const String& var){
-  Serial.println(var);
   return "Bem vindo rodrigo";
 }
 
+String processorAutorizacao(const String& var){
+  return "Não autorizado";
+}
 
+String processor404(const String& var){
+  return "Página não Encontrada";
+}
+
+String processorUsuarioSenhaincorreto(const String& var){
+  return "0";
+}
+
+
+
+void onRequest(AsyncWebServerRequest *request){
+  request->send(SPIFFS, "/404.html", String(), false, processor404);
+}
 
 bool verificaToken(){
   bool statusToken = false;
@@ -63,6 +78,7 @@ void setup() {
 server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
    request->send(SPIFFS, "/login.html", String(), false, processor);
 });
+
   
 server.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request){
    request->send(SPIFFS, "/styles.css", "text/css");
@@ -77,10 +93,10 @@ server.on("/login", HTTP_POST, [](AsyncWebServerRequest *request){
         uidUsuario = millis();
         request->redirect("/home?uid=" + String(millis()));
       }else{
-        Serial.print("usuario Não autorizado");
+        request->send(SPIFFS, "/login.html", String(), false, processorUsuarioSenhaincorreto);
       }
     }else{
-      Serial.print("Não Permitido");
+      request->send(SPIFFS, "/404.html", String(), false, processorAutorizacao);
     }
 });
 
@@ -90,13 +106,13 @@ server.on("/home", HTTP_GET, [](AsyncWebServerRequest *request){
     if(uidU == String(uidUsuario)){
        request->send(SPIFFS, "/principal.html", String(), false, processorHome);
     }else{
-       request->send(200, "text/plain", "Token negado");
+       request->send(SPIFFS, "/404.html", String(), false, processorAutorizacao);
     }
   }else{
-    request->send(200, "text/plain", "token não existente");
+    request->send(SPIFFS, "/404.html", String(), false, processorAutorizacao);
   }
 });
-
+server.onNotFound(onRequest);
 server.begin();
 Serial.println("HTTP server started");
   

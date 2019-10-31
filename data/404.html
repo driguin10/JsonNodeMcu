@@ -20,7 +20,7 @@
 </style>
 <body>
 	<div class="informacao-404">
-			<h1>Pagina não encontrada</h1>
+			<h1>%menssagem%</h1>
 			<h5>Redirecionando a pagina em <span id="tempo-404"></span> segundos</h5>
 	</div>
 	<script>
@@ -30,7 +30,7 @@
 			document.getElementById("tempo-404").innerHTML = tempo;
 			if(tempo == 0){
 				clearTimeout(intervalo);
-				//window.location.href ="/";
+				window.location.href ="/";
 			}
 			tempo--;
 		},1000);

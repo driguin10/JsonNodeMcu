@@ -12,11 +12,11 @@
 		<div class="container-login100">
 			<div class="wrap-login100">
 				<form class="login100-form form-cadastro" method="POST" action="/login">
+					<input id="status" type="hidden" value="%status%">
 					<span class="login100-form-title">
 						SmartPonto
 					</span>
-					<p>Bem vindo %nome_usuario%</p>
-
+					
 					<div class="wrap-input100 validate-input" data-validate = "Email inválido">
 						<input class="input100" type="email" name="email" id="email" placeholder="Email" autocomplete="off">
 						<span class="focus-input100"></span>
@@ -35,6 +35,11 @@
 				</form>
 			</div>
 		</div>
-	</div>	
+	</div>
+	<script>
+		if(document.getElementById("status").value == 0){
+			alert("Usuario ou senha incorretos");
+		}
+	</script>	
 </body>
 </html>
