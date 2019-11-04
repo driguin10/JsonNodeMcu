@@ -17,9 +17,38 @@ StaticJsonDocument<4000> doc;
 
 long uidUsuario = -1;
 int tempoExpiracao = 60000; //600000
+bool carregarArquivo(String arquivo);
+bool loadData();
+bool removerUsuario(String email);
+bool conectarWifi();
+void gerarWifi();
 
 char json[] = "{\"usuarios\":{\"00000001\":{\"nome\":\"rodrigo\",\"email\":\"rodrigo@codebit.com.br\",\"senha\":\"1234\"},\"00000002\":{\"nome\":\"teste\",\"email\":\"teste@codebit.com.br\",\"senha\":\"4321\"}},\"configuracao\":{\"apiUrl\":\"nerdcompannyapps.com/api/ponto/marcar-ponto\",\"bloquearPonto\":true}}";
 char jsonBase[] = "{\"usuarios\":{\"00000000\":{\"nome\":\"nome teste\",\"email\":\"teste@teste.com.br\",\"senha\":\"senhateste\"}},\"configuracao\":{\"apiUrl\":\"api.com\endpoint\",\"bloquearPonto\":true}}";
+const char btEditar[] PROGMEM = R"=====(
+<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+  viewBox="0 0 399.14 399.14" style="fill:#00ff40; stroke: #000; stroke-width: 5" xml:space="preserve">
+  <g>
+    <circle cx="108.75" cy="72.98" r="60"/>
+    <path d="M192.389,202.238c-19.946-23.984-50.006-39.258-83.639-39.258C48.689,162.98,0,211.669,0,271.73h122.897L192.389,202.238z"/>
+    <path d="M300.376,136.676l38.661-38.661l60.104,60.104l-38.661,38.661L300.376,136.676z"/>
+    <path d="M110.998,386.16l68.464-19.986l-48.478-48.477L110.998,386.16z"/>
+    <path d="M146.381,290.67l132.782-132.782l60.104,60.104L206.485,350.774L146.381,290.67z"/>
+  </g>
+</svg>
+)=====";
+const char btExcluir[] PROGMEM = R"=====(
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+  viewBox="0 0 374.144 374.144" style="fill:#ff0000; stroke: #000; stroke-width: 5" xml:space="preserve">
+  <g>
+    <circle cx="108.75" cy="67.982" r="60"/>
+    <path d="M274.715,167.303c-54.826,0-99.43,44.604-99.43,99.429s44.604,99.43,99.43,99.43s99.43-44.604,99.43-99.43
+      S329.54,167.303,274.715,167.303z M336.215,281.732h-123v-30h123V281.732z"/>
+    <path d="M108.75,157.982C48.689,157.982,0,206.671,0,266.732h145.285c0-32.364,11.941-61.991,31.647-84.709
+      C158.281,166.99,134.571,157.982,108.75,157.982z"/>
+  </g>
+</svg>
+)=====";
 
 const char* filename = "/db.json";
 String url;
@@ -30,7 +59,8 @@ String processor(const String& var){
 }
 
 String processorHome(const String& var){
-  return "Bem vindo rodrigo";
+  String ico = btExcluir;
+  return "Bem vindo rodrigo " + ico;
 }
 
 String processorAutorizacao(const String& var){
@@ -79,7 +109,6 @@ server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
    request->send(SPIFFS, "/login.html", String(), false, processor);
 });
 
-  
 server.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request){
    request->send(SPIFFS, "/styles.css", "text/css");
 });
@@ -112,6 +141,13 @@ server.on("/home", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/404.html", String(), false, processorAutorizacao);
   }
 });
+
+server.on("/logout", HTTP_GET, [](AsyncWebServerRequest *request){
+  uidUsuario = -1;
+  request->redirect("/");
+});
+
+
 server.onNotFound(onRequest);
 server.begin();
 Serial.println("HTTP server started");
