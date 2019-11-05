@@ -7,24 +7,29 @@
 #include <WiFiClient.h>
 
 
-#define APSSID "codebit"
-#define APPSK  "roikROIKroik"
+//#define APSSID "codebit"
+//#define APPSK  "roikROIKroik"
+#define APSSID "trojan"
+#define APPSK  "rodrigo3850"
 const char *ssid = APSSID;
 const char *password = APPSK;
 AsyncWebServer server(80);
-
-StaticJsonDocument<4000> doc;
-
+StaticJsonDocument<10000> doc;
 long uidUsuario = -1;
 int tempoExpiracao = 60000; //600000
+const char* filename = "/db.json";
+String url;
+int bloquearPonto;
+
 bool carregarArquivo(String arquivo);
 bool loadData();
 bool removerUsuario(String email);
 bool conectarWifi();
 void gerarWifi();
+String loadListaUsuarios();
+bool verificaToken();
+bool criaArquivo(String arquivo,String json);
 
-char json[] = "{\"usuarios\":{\"00000001\":{\"nome\":\"rodrigo\",\"email\":\"rodrigo@codebit.com.br\",\"senha\":\"1234\"},\"00000002\":{\"nome\":\"teste\",\"email\":\"teste@codebit.com.br\",\"senha\":\"4321\"}},\"configuracao\":{\"apiUrl\":\"nerdcompannyapps.com/api/ponto/marcar-ponto\",\"bloquearPonto\":true}}";
-char jsonBase[] = "{\"usuarios\":{\"00000000\":{\"nome\":\"nome teste\",\"email\":\"teste@teste.com.br\",\"senha\":\"senhateste\"}},\"configuracao\":{\"apiUrl\":\"api.com\endpoint\",\"bloquearPonto\":true}}";
 const char btEditar[] PROGMEM = R"=====(
 <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
   viewBox="0 0 399.14 399.14" style="fill:#00ff40; stroke: #000; stroke-width: 5" xml:space="preserve">
@@ -37,30 +42,31 @@ const char btEditar[] PROGMEM = R"=====(
   </g>
 </svg>
 )=====";
+
 const char btExcluir[] PROGMEM = R"=====(
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
   viewBox="0 0 374.144 374.144" style="fill:#ff0000; stroke: #000; stroke-width: 5" xml:space="preserve">
   <g>
     <circle cx="108.75" cy="67.982" r="60"/>
-    <path d="M274.715,167.303c-54.826,0-99.43,44.604-99.43,99.429s44.604,99.43,99.43,99.43s99.43-44.604,99.43-99.43
-      S329.54,167.303,274.715,167.303z M336.215,281.732h-123v-30h123V281.732z"/>
-    <path d="M108.75,157.982C48.689,157.982,0,206.671,0,266.732h145.285c0-32.364,11.941-61.991,31.647-84.709
-      C158.281,166.99,134.571,157.982,108.75,157.982z"/>
+    <path d="M274.715,167.303c-54.826,0-99.43,44.604-99.43,99.429s44.604,99.43,99.43,99.43s99.43-44.604,99.43-99.43S329.54,167.303,274.715,167.303z M336.215,281.732h-123v-30h123V281.732z"/>
+    <path d="M108.75,157.982C48.689,157.982,0,206.671,0,266.732h145.285c0-32.364,11.941-61.991,31.647-84.709C158.281,166.99,134.571,157.982,108.75,157.982z"/>
   </g>
 </svg>
 )=====";
 
-const char* filename = "/db.json";
-String url;
-int bloquearPonto;
+
 
 String processor(const String& var){
   return "rodrigooooo";
 }
 
 String processorHome(const String& var){
-  String ico = btExcluir;
-  return "Bem vindo rodrigo " + ico;
+  if(var =="tabela-conteudo"){
+    return loadListaUsuarios();
+  }else{
+    String ico = btExcluir;
+    return "Bem vindo rodrigo ";
+  } 
 }
 
 String processorAutorizacao(const String& var){
@@ -75,21 +81,11 @@ String processorUsuarioSenhaincorreto(const String& var){
   return "0";
 }
 
-
-
 void onRequest(AsyncWebServerRequest *request){
   request->send(SPIFFS, "/404.html", String(), false, processor404);
 }
 
-bool verificaToken(){
-  bool statusToken = false;
-   if(uidUsuario!= -1){
-    if(millis() <= uidUsuario + tempoExpiracao){
-      statusToken = true;
-    }
-   }
- return statusToken;
-}
+
 
 void setup() {
     Serial.begin(9600);
@@ -334,31 +330,40 @@ bool loadData(){
   return true;
 }
 
-void loadListaUsuarios(){
+String loadListaUsuarios(){
   JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
   Serial.println("--------------");
-  
+  String tabela;
   for (JsonPair kv : listaUsuarios) {
       String uid = kv.key().c_str();
       JsonObject objUsuario = kv.value().as<JsonObject>();
       String nome = objUsuario["nome"];
       String email = objUsuario["email"];
       String senha = objUsuario["senha"];
+      String ultimoPonto = objUsuario["ultimoPonto"];
       
-      Serial.println("uid: " + uid);
-      Serial.println("nome: " + nome);
-      Serial.println("enaul: " + email);
-      Serial.println("senha: " + senha);
-      Serial.println("--------------");
+      String btAcaoEditar = "<div class=\"bt-acao\" id=\"bt-editar\" data-id=\""+uid+"\">"+btEditar+"</div>";
+      String btAcaoExcluir = "<div class=\"bt-acao\" id=\"bt-excluir\" data-id=\""+uid+"\">"+btExcluir+"</div>";
+
+      tabela += "<tr>";
+      tabela += "<td>" + uid + "</td>";
+      tabela += "<td>" + nome + "</td>";
+      tabela += "<td>" + email + "</td>";
+      tabela += "<td>" + ultimoPonto + "</td>";
+      tabela += "<td class=\"bts-acao\">"+btAcaoEditar+" "+btAcaoExcluir+"</td>";
+      tabela += "</tr>"; 
   }
+
+  return tabela;
   
+  /*
   Serial.println("-----Configurações---------");
   String urlData = doc["configuracao"]["apiUrl"];
   url = urlData;
   bloquearPonto = doc["configuracao"]["bloquearPonto"].as<int>();
   Serial.println("api: " + url);
   Serial.print("Bloquear:");
-  Serial.println(bloquearPonto);
+  Serial.println(bloquearPonto);*/
 }
 
 bool carregarArquivo(String arquivo){
@@ -386,4 +391,14 @@ bool criaArquivo(String arquivo,String json){
     }else{
       return false;
     }
+}
+
+bool verificaToken(){
+  bool statusToken = false;
+   if(uidUsuario!= -1){
+    if(millis() <= uidUsuario + tempoExpiracao){
+      statusToken = true;
+    }
+   }
+ return statusToken;
 }

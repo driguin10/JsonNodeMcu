@@ -235,8 +235,8 @@ ul, li {
 }
 
 .container-conteudo{
-  max-width: 500px;
-  min-width: 500px;
+  max-width: 600px;
+  min-width: 600px;
 }
 
 .bt-logout{
@@ -293,7 +293,7 @@ table {
 }
 
 td, th {
-  border: 1px solid #dddddd;
+  border: 1px solid #d2cbcb;
   text-align: left;
   padding: 8px;
 }
@@ -306,4 +306,8 @@ tr:nth-child(even) {
   width: 35px;
   padding: 4px;
   border-radius: 20px;
+}
+
+.bts-acao{
+  display: flex;
 }
