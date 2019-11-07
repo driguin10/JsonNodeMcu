@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<title>SmartPonto</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body >
+	<div class="limiter principal">
+		<div class="container-login100">
+			<div class="container-conteudo">
+					<div class="bt-logout">
+							<a href="/logout" class="login100-form-btn bt-sair">Sair</a>
+					</div>
+					<p>%menssagem%</p>
+		
+					<div class="tab">
+							<button class="tablinks" onclick="openTab(event, 'usuarios')">Usuários</button>
+							<button class="tablinks" onclick="openTab(event, 'cadastro')">Cadastro</button>
+					</div>
+		
+					<div id="usuarios" class="tabcontent">
+							<table>
+									<tr>
+									  <th>Uid</th>
+									  <th>Nome</th>
+									  <th>Email</th>
+									  <th>Ultimo Ponto</th>
+									  <th>Ações</th>
+									</tr>
+									<div class="tabela-corpo">
+										%tabela-conteudo%										
+									</div>
+							</table>
+					</div>
+						  
+					<div id="cadastro" class="tabcontent" style="display: none;">
+					</div>	
+			</div>	
+		</div>
+	</div>	
+	<script>
+		function openTab(evt, nometab) {
+			var i, tabcontent, tablinks;
+			tabcontent = document.getElementsByClassName("tabcontent");
+			for (i = 0; i < tabcontent.length; i++) {
+				tabcontent[i].style.display = "none";
+			}
+			tablinks = document.getElementsByClassName("tablinks");
+			for (i = 0; i < tablinks.length; i++) {
+				tablinks[i].className = tablinks[i].className.replace(" active", "");
+			}
+			document.getElementById(nometab).style.display = "block";
+			evt.currentTarget.className += " active";
+		}
+
+
+		var btEditar = document.getElementById("bt-editar"); 
+		btEditar.addEventListener("click", function(){
+			alert(this.getAttribute("data-id"))
+		}, false); 
+
+		var btExcluir = document.getElementById("bt-excluir"); 
+		btExcluir.addEventListener("click", function(){
+			alert(this.getAttribute("data-id"))
+		}, false); 
+
+
+	</script>
+</body>
+</html>

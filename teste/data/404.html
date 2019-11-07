@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<title>SmartPonto</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<style>
+	body{
+		overflow: hidden;
+	}
+
+	.informacao-404{
+		height: 100vh;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+	}
+</style>
+<body>
+	<div class="informacao-404">
+			<h1>%menssagem%</h1>
+			<h5>Redirecionando a pagina em <span id="tempo-404"></span> segundos</h5>
+	</div>
+	<script>
+		var tempo = 5;
+		document.getElementById("tempo-404").innerHTML = tempo;
+		var intervalo = setInterval(function (){
+			document.getElementById("tempo-404").innerHTML = tempo;
+			if(tempo == 0){
+				clearTimeout(intervalo);
+				window.location.href ="/";
+			}
+			tempo--;
+		},1000);
+	</script>
+</body>
+
+</html>

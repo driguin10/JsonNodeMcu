@@ -1,0 +1,17 @@
+{
+    "ssidExterno":"1234567891236547",
+    "passwordExterno":"123456789123456",
+    "ssidLocal":"123456789123456",
+    "passwordLocal":"123456789123456",
+    "timeOutWifiLocal":123456,
+    "tipoLeitor":0,
+    "tipoPonto":{
+        "apiUrl":"api.endpoint.endpoint.endpoint",
+        "bloquearPonto":false
+    },
+    "tipoPorteiro":{
+        "pinPorta":0,
+        "inverterPin":false,
+        "bloquearPortao":false
+    }
+}

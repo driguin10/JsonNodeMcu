@@ -1,0 +1,52 @@
+{ 
+    "testetestestestesteste@testestesteste1.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    },
+    "testetestestestesteste@testestesteste2.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    },
+    "testetestestestesteste@testestesteste3.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    },
+    "testetestestestesteste@testestesteste4.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    },
+    "testetestestestesteste@testestesteste5.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    },
+    "testetestestestesteste@testestesteste6.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    },
+    "testetestestestesteste@testestesteste7.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    },
+    "testetestestestesteste@testestesteste8.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    },
+    "testetestestestesteste@testestesteste9.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    },
+    "testetestestestesteste@testestesteste10.com.br":{ 
+       "nome":"teste teste teste teste",
+       "senha":"123456789012345",
+       "uids":"100"
+    }
+ }
