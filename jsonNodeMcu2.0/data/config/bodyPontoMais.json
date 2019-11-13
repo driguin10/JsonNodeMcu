@@ -1,0 +1,36 @@
+{
+    "header":{
+        "uuid" : "525e0f31-6f89-446b-998a-9d1f96b22389",
+        "Content-Type" : "application/json;charset=utf-8",
+        "access-token":"token",
+        "token-type": "Bearer",
+        "client": "client_id",
+        "uid":"usuario_email",
+        "Origin": "https://app.pontomaisweb.com.br"
+    },
+    "body":{
+        "time_card": {
+            "latitude": "-20.570750",
+            "longitude":"-47.367917",
+            "address": "Av. Emílio Paludeto, 5860 - 01 - Vila Hipica, Franca - SP, 14403-860, Brasil",
+            "reference_id": null,
+            "original_latitude": "-20.570750",
+            "original_longitude": "-47.367917",
+            "original_address": "Av. Emílio Paludeto, 5860 - 01 - Vila Hipica, Franca - SP, 14403-860, Brasil",
+            "location_edited": false
+        },
+        "_path": "/meu_ponto/registro_de_ponto",
+        "_device": {
+            "manufacturer": null,
+            "model": null,
+            "uuid": null,
+            "version": null,
+            "browser": {
+                "name": "Firefox",
+                "version": "69.0",
+                "versionSearchString": "Firefox"
+            }
+        },
+        "_appVersion": "0.10.32"
+    }
+}

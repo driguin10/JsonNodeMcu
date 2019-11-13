@@ -1,0 +1,21 @@
+{
+    "ssidExterno":"codebit",
+    "passwordExterno":"roikROIKroik",
+    "ssidLocal":"SmartPonto",
+    "passwordLocal":"codehell666",
+    "timeOutWifiLocal":60000,
+    "tipoLeitor":"ponto",
+    "tipoLeitorInfo":{
+        "ponto":{
+            "apiUrl":"https://api.pontomais.com.br/api/",
+            "endPointToken":"auth/sign_in",
+            "endPointMarcarPonto":"time_cards/register",
+            "bloquearPonto":false
+        },
+        "porta":{
+            "pinPorta":0,
+            "inverterPin":false,
+            "bloquearPortao":false
+        }
+    }
+}
