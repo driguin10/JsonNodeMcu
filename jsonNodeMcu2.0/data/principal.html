@@ -22,17 +22,16 @@
 					</div>
 		
 					<div id="usuarios" class="tabcontent">
-							<table>
+							<table id="tabela-usuarios">
 									<tr>
-									  <th>Uid</th>
 									  <th>Nome</th>
 									  <th>Email</th>
-									  <th>Ultimo Ponto</th>
+									  <th>Tipo</th>
 									  <th>Ações</th>
 									</tr>
-									<div class="tabela-corpo">
-										%tabela-conteudo%										
-									</div>
+									
+									%tabela-conteudo%										
+									
 							</table>
 					</div>
 						  
@@ -56,6 +55,9 @@
 			evt.currentTarget.className += " active";
 		}
 
+		
+
+		
 
 		var btEditar = document.getElementById("bt-editar"); 
 		btEditar.addEventListener("click", function(){
@@ -64,8 +66,34 @@
 
 		var btExcluir = document.getElementById("bt-excluir"); 
 		btExcluir.addEventListener("click", function(){
-			alert(this.getAttribute("data-id"))
+			var r = confirm("Deseja Realmente excluir este usuário?");
+			if (r == true) {
+				window.location.href = "/excluir?" + this.getAttribute("data-id");
+			} 
 		}, false); 
+
+
+		atualizaTabela();
+
+		function atualizaTabela(){
+			var tabela = document.querySelectorAll("#tabela-usuarios #email");
+				for(var i = 0; i < tabela.length; i++){
+					var ui = tabela[i].innerHTML;
+					for(var y = i+1; y < tabela.length; y++){
+						var uy = tabela[y].innerHTML;
+						if(ui == uy){
+							console.log(i);
+							var tb = document.getElementById("tabela-usuarios");
+							if(i <= tabela.length){
+								tb.deleteRow(i);
+								atualizaTabela();
+							}
+						}
+					}
+				}
+		}
+
+		
 
 
 	</script>

@@ -17,7 +17,7 @@ const char *password = APPSK;
 AsyncWebServer server(80);
 StaticJsonDocument<500> doc;
 long uidUsuario = -1;
-int tempoExpiracao = 60000; //600000
+int tempoExpiracao = 90000; //600000
 String url;
 int bloquearPonto;
 
@@ -33,6 +33,9 @@ JsonObject buscarCartao(String numeroUID);
 bool adicionarCartao(String numeroUID, String json);
 bool adicionarCartao(String numeroUID, String json);
 String loadListaUsuarios();
+bool excluirUsuario(String identificacao , bool uid);
+
+
 
 const char btEditar[] PROGMEM = R"=====(
 <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -83,6 +86,10 @@ String processor404(const String& var){
 
 String processorUsuarioSenhaincorreto(const String& var){
   return "0";
+}
+
+String processorExcluir(const String& var){
+  return "Erro ao excluir usuario";
 }
 
 void onRequest(AsyncWebServerRequest *request){
@@ -146,16 +153,42 @@ void setup() {
   });
 
 
+
+ server.on("/excluir", HTTP_GET, [](AsyncWebServerRequest *request){
+    if(request->hasParam("uid") && request->hasParam("email") ){
+      String uidU = request->getParam("uid")->value().c_str();
+      String email = request->getParam("email")->value().c_str();
+      if(uidU == String(uidUsuario)){
+         if(excluirUsuario(email,false)){
+            request->redirect("/home?uid=" + String(uidUsuario));
+          }else{
+            request->send(SPIFFS, "/404.html", String(), false, processorExcluir);
+          }
+      }else{ 
+        request->send(SPIFFS, "/404.html", String(), false, processorAutorizacao);
+      }
+    }else{
+      request->send(SPIFFS, "/404.html", String(), false, processorAutorizacao);
+    } 
+  });
+  
+
   server.onNotFound(onRequest);
   server.begin();
   Serial.println("HTTP server started");
     
-
     if(!conectarWifi()){
       gerarWifi();
     }else{
      
     }
+
+   /* if(excluirUsuario("rodrigo@codebit.com",false)){
+      Serial.println("excluido");
+    }else{
+      Serial.println("erro");
+    }*/
+    
 }
 
 void loop() {
@@ -165,7 +198,6 @@ void loop() {
   }
  }
 }
-
 
 void gerarWifi(){
   Serial.print("Configurando access point...");
@@ -199,14 +231,12 @@ bool conectarWifi(){
   }
 }
 
-
 void novoUsuario(String uid, String nome, String email, String senha){
     JsonObject user = doc["usuarios"].createNestedObject(uid);
     user["nome"] = nome;
     user["email"] = email;
     user["senha"] = senha;
 }
-
 
 bool loadData(){
   JsonObject listaUsuarios = doc["usuarios"].as<JsonObject>();
@@ -228,7 +258,6 @@ bool loadData(){
   return true;
 }
 
-
 String loadListaUsuarios(){
   String tabela="";
   Dir dir = SPIFFS.openDir("/cartoes/");
@@ -241,12 +270,11 @@ String loadListaUsuarios(){
         String type = usuario["type"];
         
         String btAcaoEditar = "<div class=\"bt-acao\" id=\"bt-editar\" data-id=\""+uid+"\">"+btEditar+"</div>";
-        String btAcaoExcluir = "<div class=\"bt-acao\" id=\"bt-excluir\" data-id=\""+uid+"\">"+btExcluir+"</div>";
+        String btAcaoExcluir = "<div class=\"bt-acao\" id=\"bt-excluir\" data-id=\"uid="+ String(uidUsuario) +"&email="+email+"\">"+btExcluir+"</div>";
     
         tabela += "<tr>";
-        tabela += "<td>" + uid + "</td>";
         tabela += "<td>" + nome + "</td>";
-        tabela += "<td>" + email + "</td>";
+        tabela += "<td id='email'>" + email + "</td>";
         tabela += "<td>" + type + "</td>";
         tabela += "<td class=\"bts-acao\">"+btAcaoEditar+" "+btAcaoExcluir+"</td>";
         tabela += "</tr>";
@@ -263,6 +291,9 @@ String trataNomeArquivo(String file){
 }
 
 
+
+
+/*
 JsonObject buscarUsuarioEmail(String email){
   File root = SPIFFS.open("/cartoes/","r");
   File file = root.openNextFile();
@@ -274,6 +305,66 @@ JsonObject buscarUsuarioEmail(String email){
       }
     } 
     file = root.openNextFile();
+  }
+}*/
+
+
+
+
+
+
+
+
+//funções ok
+
+bool excluirUsuario(String identificacao , bool uid){
+  int qt = 0;
+  if(uid){
+    if(SPIFFS.remove("/cartoes/" + identificacao + ".json")){
+      Serial.println(" excluido");
+      return true;
+    }else{
+      Serial.println(" erro");
+      return false;
+    }
+  }else{
+      Dir dir = SPIFFS.openDir("/cartoes/");
+      while(dir.next()){
+        String uid = trataNomeArquivo(dir.fileName());
+        JsonObject usuario = buscarCartao(uid);
+        if(usuario.size() > 0 ) {
+           if(usuario["email"] == identificacao){
+              if(SPIFFS.remove("/cartoes/" + uid + ".json")){
+                Serial.println("excluido");
+                qt++;
+              }else{
+                Serial.println(" erro ao excluir");
+              }
+            }
+        }
+      }
+  }
+
+  if(qt>0){
+    Serial.println("qt:");
+    Serial.print(qt);
+    return true;
+  }else{
+    return false;
+     Serial.println("nenhum excluido");
+  }
+}
+
+JsonObject buscarUsuarioEmail(String email){
+  Dir dir = SPIFFS.openDir("/cartoes/");
+  while(dir.next()){
+    String uid = trataNomeArquivo(dir.fileName());
+    JsonObject usuario = buscarCartao(uid);
+    if(usuario.size() > 0 ) {
+       if(usuario["email"] == email){
+        return usuario;
+      }
+    }
   }
 }
 

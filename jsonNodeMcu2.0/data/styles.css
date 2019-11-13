@@ -311,3 +311,7 @@ tr:nth-child(even) {
 .bts-acao{
   display: flex;
 }
+
+.tabcontent{
+  padding: 0!important;
+}
