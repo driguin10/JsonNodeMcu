@@ -8,6 +8,7 @@
 </head>
 
 <body>
+	<input type="hidden" id="data_tabela" value="%datTabela%">
 	<div class="limiter principal">
 		<div class="container-login100">
 			<div class="container-conteudo">
@@ -30,7 +31,9 @@
 									  <th>Ações</th>
 									</tr>
 									
-									%tabela-conteudo%										
+									<tbody id="tabela_campos">
+
+									</tbody>								
 									
 							</table>
 					</div>
@@ -41,6 +44,10 @@
 		</div>
 	</div>	
 	<script>
+
+	
+		var data = JSON.parse("%datTabela%");
+
 		function openTab(evt, nometab) {
 			var i, tabcontent, tablinks;
 			tabcontent = document.getElementsByClassName("tabcontent");
@@ -56,10 +63,26 @@
 		}
 
 		
+		function atualizaTabela(){
+		var corpo =	document.getElementById("tabela_campos");
 
+
+
+			for(var x=0 ; x < Object.keys(data).length; x++){
+				var tag = "<tr>"+
+							"<td>"+data[Object.keys(data)[x]].nome+"</td>"+
+							"<td>"+data[Object.keys(data)[x]].email+"</td>"+
+							"<td>"+data[Object.keys(data)[x]].tipo+"</td>"+
+							"</tr>";
+	
+	
+				
+				 corpo.append(tag);
+			}
+		}
 		
 
-		var btEditar = document.getElementById("bt-editar"); 
+		/*var btEditar = document.getElementById("bt-editar"); 
 		btEditar.addEventListener("click", function(){
 			alert(this.getAttribute("data-id"))
 		}, false); 
@@ -70,21 +93,13 @@
 			if (r == true) {
 				window.location.href = "/excluir?" + this.getAttribute("data-id");
 			} 
-		}, false); 
+		}, false); */
+
+
 
 
 
 /*
-
-
-
-*/
-
-		
-var dd = {xx:{nome:"John", email:"Doe", tipo:46},yy:{firstName:"aaa", lastName:"er", age:5}};
-
-
-
 		function atualizaTabela(){
 			var tabela = document.querySelectorAll("#tabela-usuarios #email");
 				for(var i = 0; i < tabela.length; i++){
@@ -116,7 +131,7 @@ var dd = {xx:{nome:"John", email:"Doe", tipo:46},yy:{firstName:"aaa", lastName:"
 					var email1 = tabela.rows[i].cells[1];
 					console.log(email1);
 				}
-		}
+		}*/
 
 		
 

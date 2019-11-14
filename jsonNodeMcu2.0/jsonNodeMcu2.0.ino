@@ -8,10 +8,10 @@
 
 
 
-//#define APSSID "codebit"
-//#define APPSK  "roikROIKroik"
-#define APSSID "trojan"
-#define APPSK  "rodrigo3850"
+#define APSSID "codebit"
+#define APPSK  "roikROIKroik"
+//#define APSSID "trojan"
+//#define APPSK  "rodrigo3850"
 const char *ssid = APSSID;
 const char *password = APPSK;
 AsyncWebServer server(80);
@@ -68,7 +68,7 @@ String processor(const String& var){
 }
 
 String processorHome(const String& var){
-  if(var =="tabela-conteudo"){
+  if(var == "datTabela"){
     return loadListaUsuarios();
   }else{
     String ico = btExcluir;
@@ -259,7 +259,7 @@ bool loadData(){
 }
 
 
-
+/*
 String loadListaUsuarios(){
   String tabela="";
   Dir dir = SPIFFS.openDir("/cartoes/");
@@ -284,6 +284,61 @@ String loadListaUsuarios(){
   }
   return tabela;
 }
+*/
+
+
+/*
+String loadListaUsuarios(){
+  String lista="{";
+  Dir dir = SPIFFS.openDir("/cartoes/");
+  while(dir.next()){
+    String uid = trataNomeArquivo(dir.fileName());
+    JsonObject usuario = buscarCartao(uid);
+    if(usuario.size() > 0 ) {
+        String nome = usuario["nome"];
+        String email = usuario["email"];
+        String type = usuario["type"];
+
+       
+        lista += "\n\"" + uid + "\":{\n";
+        lista += "\"nome\":\"" + nome + "\",\n\"email\":\""+email+"\",\n\"tipo\":\""+type+"\"\n},";
+        
+    }
+  }
+  String listaAux = lista.substring(0,(lista.length()-1)); 
+  listaAux+="\n}";
+
+  return listaAux;
+}*/
+
+
+String loadListaUsuarios(){
+  String lista="{";
+  Dir dir = SPIFFS.openDir("/cartoes/");
+  while(dir.next()){
+    String uid = trataNomeArquivo(dir.fileName());
+    JsonObject usuario = buscarCartao(uid);
+    if(usuario.size() > 0 ) {
+        String nome = usuario["nome"];
+        String email = usuario["email"];
+        String type = usuario["type"];
+
+       
+        lista += "\\\"" + uid + "\\\":{";
+        lista += "\\\"nome\\\":\\\"" + nome + "\\\",\\\"email\\\":\\\""+email+"\\\",\\\"tipo\\\":\\\""+type+"\\\"},";
+        
+    }
+  }
+  String listaAux = lista.substring(0,(lista.length()-1)); 
+  listaAux+="}";
+Serial.println(listaAux);
+  return listaAux;
+}
+
+
+
+
+
 
 String trataNomeArquivo(String file){
   String nomeArquivo = file;
