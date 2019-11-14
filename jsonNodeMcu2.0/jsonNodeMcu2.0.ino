@@ -8,16 +8,16 @@
 
 
 
-#define APSSID "codebit"
-#define APPSK  "roikROIKroik"
-//#define APSSID "trojan"
-//#define APPSK  "rodrigo3850"
+//#define APSSID "codebit"
+//#define APPSK  "roikROIKroik"
+#define APSSID "trojan"
+#define APPSK  "rodrigo3850"
 const char *ssid = APSSID;
 const char *password = APPSK;
 AsyncWebServer server(80);
 StaticJsonDocument<500> doc;
 long uidUsuario = -1;
-int tempoExpiracao = 90000; //600000
+int tempoExpiracao = 600000; //600000
 String url;
 int bloquearPonto;
 
@@ -123,7 +123,7 @@ void setup() {
          String emailU = request->getParam("email",true)->value().c_str();
          String senhaU = request->getParam("senha",true)->value().c_str();
   
-        if(emailU == "a@a" && senhaU == "123"){
+        if(emailU == "a@a" && senhaU == "1"){
           uidUsuario = millis();
           request->redirect("/home?uid=" + String(millis()));
         }else{
@@ -257,6 +257,8 @@ bool loadData(){
   }
   return true;
 }
+
+
 
 String loadListaUsuarios(){
   String tabela="";

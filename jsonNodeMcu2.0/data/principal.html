@@ -7,7 +7,7 @@
 	<link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
-<body >
+<body>
 	<div class="limiter principal">
 		<div class="container-login100">
 			<div class="container-conteudo">
@@ -73,23 +73,48 @@
 		}, false); 
 
 
-		atualizaTabela();
+
+/*
+
+
+
+*/
+
+		
+var dd = {xx:{nome:"John", email:"Doe", tipo:46},yy:{firstName:"aaa", lastName:"er", age:5}};
+
+
 
 		function atualizaTabela(){
 			var tabela = document.querySelectorAll("#tabela-usuarios #email");
 				for(var i = 0; i < tabela.length; i++){
 					var ui = tabela[i].innerHTML;
-					for(var y = i+1; y < tabela.length; y++){
+					for(var y = i+1; y <= tabela.length; y++){
 						var uy = tabela[y].innerHTML;
 						if(ui == uy){
-							console.log(i);
-							var tb = document.getElementById("tabela-usuarios");
-							if(i <= tabela.length){
-								tb.deleteRow(i);
-								atualizaTabela();
-							}
+
+						
+							var tab = document.getElementById("tabela-usuarios");
+							
+
+							
+							console.log(tab.rows.length);
+							console.log(y);
+							
+							tab.deleteRow(y);
+							setTimeout(function(){ atualizaTabela(); }, 3000);
+							
 						}
 					}
+				}
+		}
+
+		function atualizaTabela2(){
+			var tabela = document.getElementById("tabela-usuarios");
+
+				for(var i = 1; i < tabela.rows.length; i++){
+					var email1 = tabela.rows[i].cells[1];
+					console.log(email1);
 				}
 		}
 
